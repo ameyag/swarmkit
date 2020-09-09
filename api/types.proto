@@ -1315,6 +1315,9 @@ message VolumeAssignment {
 	// Secrets is the set of secrets required by the CSI plugin. These refer to
 	// swarmkit Secrets that will be distributed separately to the node.
 	repeated VolumeSecret secrets = 7;
+
+	// StageUnstageVolume indicates if the plugin supports volume stage/unstage capability
+	bool stage_unstage_volume = 8;
 }
 
 // VolumeAttachment is the information associating a Volume with a Task.

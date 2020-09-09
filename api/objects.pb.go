@@ -6105,7 +6105,7 @@ func (this *NetworkAttachment) String() string {
 		return "nil"
 	}
 	keysForDriverAttachmentOpts := make([]string, 0, len(this.DriverAttachmentOpts))
-	for k, _ := range this.DriverAttachmentOpts {
+	for k := range this.DriverAttachmentOpts {
 		keysForDriverAttachmentOpts = append(keysForDriverAttachmentOpts, k)
 	}
 	github_com_gogo_protobuf_sortkeys.Strings(keysForDriverAttachmentOpts)
@@ -6153,7 +6153,7 @@ func (this *Cluster) String() string {
 	}
 	repeatedStringForUnlockKeys += "}"
 	keysForBlacklistedCertificates := make([]string, 0, len(this.BlacklistedCertificates))
-	for k, _ := range this.BlacklistedCertificates {
+	for k := range this.BlacklistedCertificates {
 		keysForBlacklistedCertificates = append(keysForBlacklistedCertificates, k)
 	}
 	github_com_gogo_protobuf_sortkeys.Strings(keysForBlacklistedCertificates)

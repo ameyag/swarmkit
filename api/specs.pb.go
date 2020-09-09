@@ -4459,7 +4459,7 @@ func (this *ContainerSpec) String() string {
 	}
 	repeatedStringForConfigs += "}"
 	keysForLabels := make([]string, 0, len(this.Labels))
-	for k, _ := range this.Labels {
+	for k := range this.Labels {
 		keysForLabels = append(keysForLabels, k)
 	}
 	github_com_gogo_protobuf_sortkeys.Strings(keysForLabels)
@@ -4469,7 +4469,7 @@ func (this *ContainerSpec) String() string {
 	}
 	mapStringForLabels += "}"
 	keysForSysctls := make([]string, 0, len(this.Sysctls))
-	for k, _ := range this.Sysctls {
+	for k := range this.Sysctls {
 		keysForSysctls = append(keysForSysctls, k)
 	}
 	github_com_gogo_protobuf_sortkeys.Strings(keysForSysctls)

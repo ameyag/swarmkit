@@ -94,32 +94,34 @@ func (r *volumes) tryAddVolume(ctx context.Context, assignment *api.VolumeAssign
 		log.G(ctx).Debugf("plugin not found for VolumeID:%v", assignment.VolumeID)
 		return
 	}
-	if err := plugin.NodeStageVolume(ctx, assignment); err != nil {
-		waitFor := initialBackoff
-	retryStage:
-		for i := 0; i < maxRetries; i++ {
-			select {
-			case <-ctx.Done():
-				// selecting on ctx.Done() allows us to bail out of retrying early
-				return
-			case <-time.After(waitFor):
-				// time.After is better than using time.Sleep, because it blocks
-				// on a channel read, rather than suspending the whole
-				// goroutine. That lets us do the above check on ctx.Done().
-				//
-				// time.After is convenient, but it has a key problem: the timer
-				// is not garbage collected until the channel fires. this
-				// shouldn't be a problem, unless the context is canceled, there
-				// is a very long timer, and there are a lot of other goroutines
-				// in the same situation.
-				if err := plugin.NodeStageVolume(ctx, assignment); err == nil {
-					break retryStage
+	if assignment.StageUnstageVolume {
+		if err := plugin.NodeStageVolume(ctx, assignment); err != nil {
+			waitFor := initialBackoff
+		retryStage:
+			for i := 0; i < maxRetries; i++ {
+				select {
+				case <-ctx.Done():
+					// selecting on ctx.Done() allows us to bail out of retrying early
+					return
+				case <-time.After(waitFor):
+					// time.After is better than using time.Sleep, because it blocks
+					// on a channel read, rather than suspending the whole
+					// goroutine. That lets us do the above check on ctx.Done().
+					//
+					// time.After is convenient, but it has a key problem: the timer
+					// is not garbage collected until the channel fires. this
+					// shouldn't be a problem, unless the context is canceled, there
+					// is a very long timer, and there are a lot of other goroutines
+					// in the same situation.
+					if err := plugin.NodeStageVolume(ctx, assignment); err == nil {
+						break retryStage
+					}
 				}
+				// if the exponential factor is 2, you can avoid using floats by
+				// doing bit shifts. each shift left increases the number by a power
+				// of 2. we can do this because Duration is ultimately int64.
+				waitFor = waitFor << 1
 			}
-			// if the exponential factor is 2, you can avoid using floats by
-			// doing bit shifts. each shift left increases the number by a power
-			// of 2. we can do this because Duration is ultimately int64.
-			waitFor = waitFor << 1
 		}
 	}
 
@@ -152,7 +154,8 @@ func (r *volumes) tryRemoveVolume(ctx context.Context, assignment *api.VolumeAss
 		log.G(ctx).Debugf("plugin not found for VolumeID:%v", assignment.VolumeID)
 		return
 	}
-	if err := plugin.NodeUnpublishVolume(ctx, assignment); err != nil {
+	var err error
+	if err = plugin.NodeUnpublishVolume(ctx, assignment); err != nil {
 		waitFor := initialBackoff
 	retryUnPublish:
 		for i := 0; i < maxRetries; i++ {
@@ -169,19 +172,21 @@ func (r *volumes) tryRemoveVolume(ctx context.Context, assignment *api.VolumeAss
 	}
 
 	// Unstage
-	if err := plugin.NodeUnstageVolume(ctx, assignment); err != nil {
-		waitFor := initialBackoff
-	retryUnstage:
-		for i := 0; i < maxRetries; i++ {
-			select {
-			case <-ctx.Done():
-				return
-			case <-time.After(waitFor):
-				if err := plugin.NodeUnstageVolume(ctx, assignment); err == nil {
-					break retryUnstage
+	if assignment.StageUnstageVolume {
+		if err = plugin.NodeUnstageVolume(ctx, assignment); err != nil {
+			waitFor := initialBackoff
+		retryUnstage:
+			for i := 0; i < maxRetries; i++ {
+				select {
+				case <-ctx.Done():
+					return
+				case <-time.After(waitFor):
+					if err := plugin.NodeUnstageVolume(ctx, assignment); err == nil {
+						break retryUnstage
+					}
 				}
+				waitFor = waitFor << 1
 			}
-			waitFor = waitFor << 1
 		}
 	}
 }

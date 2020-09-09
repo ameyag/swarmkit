@@ -147,12 +147,14 @@ func (np *NodePlugin) NodePublishVolume(ctx context.Context, req *api.VolumeAssi
 
 	np.Lock.Lock()
 	defer np.Lock.Unlock()
-	if v, ok := np.VolumeMap[volID]; ok {
-		if _, err := os.Stat(v.targetPath); os.IsNotExist(err) {
-			os.Mkdir(v.targetPath, os.ModeDir)
+	if req.StageUnstageVolume {
+		if v, ok := np.VolumeMap[volID]; ok {
+			if _, err := os.Stat(v.targetPath); os.IsNotExist(err) {
+				os.Mkdir(v.targetPath, os.ModeDir)
+			}
+			v.isPublished = true
+			return nil
 		}
-		v.isPublished = true
-		return nil
 	}
 
 	return status.Errorf(codes.NotFound, "VolumeID %s is not staged", volID)

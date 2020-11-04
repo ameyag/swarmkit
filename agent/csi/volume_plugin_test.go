@@ -13,14 +13,14 @@ import (
 	"google.golang.org/grpc/codes"
 )
 
-func newVolumeClient(name string, nodeID string) *NodePlugin {
-	return NewNodePlugin(name, nodeID)
+func newVolumeClient(name string, nodeID string, isStaging bool) *NodePlugin {
+	return NewFakenodePlugin(name, nodeID, isStaging)
 }
 
 func TestNodeStageVolume(t *testing.T) {
 	plugin := "plugin-1"
 	node := "node-1"
-	nodePlugin := newVolumeClient(plugin, node)
+	nodePlugin := newVolumeClient(plugin, node, true)
 	s := &api.VolumeAssignment{
 		VolumeID: "vol1",
 		AccessMode: &api.VolumeAccessMode{
@@ -36,9 +36,9 @@ func TestNodeStageVolume(t *testing.T) {
 }
 
 func TestNodeUnstageVolume(t *testing.T) {
-	plugin := "plugin-2"
+	plugin := "plugin-22"
 	node := "node-1"
-	nodePlugin := newVolumeClient(plugin, node)
+	nodePlugin := newVolumeClient(plugin, node, true)
 	s := &api.VolumeAssignment{
 		VolumeID: "vol2",
 		AccessMode: &api.VolumeAccessMode{
@@ -64,9 +64,9 @@ func TestNodeUnstageVolume(t *testing.T) {
 }
 
 func TestNodePublishVolume(t *testing.T) {
-	plugin := "plugin-3"
+	plugin := "plugin-33"
 	node := "node-1"
-	nodePlugin := newVolumeClient(plugin, node)
+	nodePlugin := newVolumeClient(plugin, node, true)
 	s := &api.VolumeAssignment{
 		VolumeID: "vol3",
 		AccessMode: &api.VolumeAccessMode{
@@ -90,7 +90,7 @@ func TestNodePublishVolume(t *testing.T) {
 func TestNodeUnpublishVolume(t *testing.T) {
 	plugin := "plugin-4"
 	node := "node-1"
-	nodePlugin := newVolumeClient(plugin, node)
+	nodePlugin := newVolumeClient(plugin, node, true)
 	s := &api.VolumeAssignment{
 		VolumeID: "vol4",
 		AccessMode: &api.VolumeAccessMode{

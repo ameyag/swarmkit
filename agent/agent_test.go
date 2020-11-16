@@ -439,6 +439,7 @@ func TestAgentExitsBasedOnSessionTracker(t *testing.T) {
 }
 
 func TestAgentCSIInfo(t *testing.T) {
+	t.skip()
 	tlsCh := make(chan events.Event, 1)
 	defer close(tlsCh)
 	tester := agentTestEnv(t, nil, tlsCh)
